@@ -5,9 +5,6 @@
     #clienteForm
     p-auto-focus="name"
     [p-fields]="fields"
-    [p-load]="onLoadFields.bind(this)"
-    [p-validate]="this.onChangeFields.bind(this)"
-    [p-validate-fields]="validateFields"
     [p-value]="cliente"
   >
   </po-dynamic-form>
@@ -18,9 +15,6 @@
     <po-dynamic-form
       #dynamicFormTelefoneCliente
       [p-fields]="fieldsTelefone"
-      [p-load]="onLoadFieldsTelefone.bind(this)"
-      [p-validate]="this.onChangeFieldsTelefone.bind(this)"
-      [p-validate-fields]="validateFields"
       [p-value]="telefoneCliente"
     >
     </po-dynamic-form>
@@ -34,7 +28,7 @@
 
   <br/>
 
-  <po-table class="po-md-6 po-lg-6"
+  <po-table class="po-md-6 po-lg-6 po-sm-12"
             [p-auto-collapse]="true"
             [p-columns]="getCollumnsTelefone()"
             [p-hide-columns-manager]="true"
@@ -48,7 +42,7 @@
   >
 
     <ng-template p-table-cell-template let-column="column" let-row="row">
-      <span>{{ row.telefone }}</span>
+      <span>{{ Utils.formataNumeroTelefone(row.telefone) }}</span>
     </ng-template>
   </po-table>
 

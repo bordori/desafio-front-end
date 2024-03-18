@@ -1,5 +1,6 @@
 <po-page-default>
   <po-button p-label="Incluir" routerLink="/cliente/incluir"> </po-button>
+  <po-button style="float: right" p-label="Atualizar" (click)="atualizarListagem()"> </po-button>
   <po-table
     [p-auto-collapse]="true"
     [p-columns]="columns"
@@ -13,5 +14,11 @@
     [p-actions-right]="true"
   >
   </po-table>
+
+  <po-modal p-title="Confirmar a exclusão?"
+            [p-primary-action]="confirmarExclusao"
+            [p-secondary-action]="cancelarExclusao">
+    Deseja confirmar a exclusão do cliente?
+  </po-modal>
 </po-page-default>
 

@@ -1,8 +1,16 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {PoModalComponent, PoModule, PoTableAction, PoTableColumn, PoTableColumnSpacing} from "@po-ui/ng-components";
+import {
+  PoModalAction,
+  PoModalComponent,
+  PoModule, PoNotificationService,
+  PoTableAction,
+  PoTableColumn,
+  PoTableColumnSpacing
+} from "@po-ui/ng-components";
 import {FormsModule} from "@angular/forms";
-import {ActivatedRoute, Router, RouterLink} from "@angular/router";
+import {Router, RouterLink} from "@angular/router";
 import {ClienteService} from "../service/cliente.service";
+import {Cliente} from "../model/cliente.model";
 
 
 @Component({
@@ -16,7 +24,7 @@ import {ClienteService} from "../service/cliente.service";
   ],
   styleUrl: './cliente-listar.component.scss'
 })
-export class ClienteListarComponent implements OnInit{
+export class ClienteListarComponent implements OnInit {
 
   protected readonly PoTableColumnSpacing = PoTableColumnSpacing;
 
@@ -24,9 +32,13 @@ export class ClienteListarComponent implements OnInit{
   itens: Array<any> = []
   actions: Array<PoTableAction> = []
 
-  @ViewChild(PoModalComponent, { static: true }) poModal!: PoModalComponent
+  clienteExclusao?: Cliente
 
-  constructor(private clienteService: ClienteService, private router: Router) {
+  @ViewChild(PoModalComponent, {static: true}) poModal!: PoModalComponent
+
+  constructor(private clienteService: ClienteService,
+              private router: Router,
+              private poNotificationService: PoNotificationService) {
   }
 
   ngOnInit(): void {
@@ -40,35 +52,94 @@ export class ClienteListarComponent implements OnInit{
         label: 'Alterar',
       },
       {
-        // action: this.discount.bind(this),
+        action: this.abrirModalExclusao.bind(this),
         icon: 'po-icon po-icon-user-delete',
         label: 'Excluir',
       },
     ]
 
-   this.atualizarListagem()
+    this.atualizarListagem()
   }
 
   alterar(row: any) {
     this.router.navigate([`/cliente/${row.id}/alterar`]).then(r => console.log(r))
   }
 
+
   getColumns(): Array<PoTableColumn> {
     return [
-      { property: 'nome', type: 'string', width: '25%', label: 'Nome' },
-      { property: 'endereco', type: 'string', width: '50%', label: 'Endereço' },
-      { property: 'bairro', type: 'string', width: '25%', label: 'bairro' },
+      {property: 'nome', type: 'string',  label: 'Nome'},
+      {property: 'endereco', type: 'string', label: 'Endereço'},
+      {property: 'bairro', type: 'string', label: 'bairro'},
     ];
   }
 
-  abrirModal() {
+  abrirModalExclusao(row: any) {
+    this.clienteExclusao = row;
     this.poModal.open();
   }
 
   atualizarListagem() {
-    this.clienteService.getTodosClientes().pipe().subscribe((res: any) => {
-      this.itens = res;
-      console.log(this.itens);
+    this.clienteService.getTodosClientes().subscribe({
+      next: (res: any) => {
+        this.itens = res;
+      },
+      error: (e) => {
+        console.error(e)
+        let erro = 'Erro ao buscar clientes'
+
+        if (e.error.error)
+          erro = e.error.error
+
+        this.poNotificationService.error({
+          message: erro,
+          duration: 5000,
+        })
+      }
     })
+  }
+
+  confirmarExclusao: PoModalAction = {
+    action: () => {
+      if (!this.clienteExclusao) return
+      let id = this.clienteExclusao?.id ? this.clienteExclusao.id : 0
+      this.clienteService.excluirCliente(id).subscribe({
+        next: () => {
+          this.poNotificationService.success({
+            message: 'Cliente excluído com sucesso!',
+            duration: 5000
+          })
+        },
+        error: (err) => {
+          let msg = 'Erro ao excluir cliente!'
+
+          if (err.error.error) {
+            msg = err.error.error
+          }
+
+          this.poNotificationService.error({
+            message: msg,
+            duration: 5000
+          })
+          console.log(err)
+        },
+        complete: () => {
+          this.atualizarListagem()
+          this.poModal.close();
+          this.clienteExclusao = {}
+        }
+      })
+      this.poModal.close();
+      this.clienteExclusao = {}
+    },
+    label: 'Sim'
+  }
+
+  cancelarExclusao: PoModalAction = {
+    action: () => {
+      this.clienteExclusao = {}
+      this.poModal.close();
+    },
+    label: 'Não'
   }
 }

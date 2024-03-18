@@ -28,8 +28,24 @@ export class ClienteService {
     )
   }
 
+  alterarCliente(cliente: any) {
+    return this.http.request('PUT', this.rootUrl + '/alterar', {body: cliente}).pipe(
+      res => {
+        return res;
+      }
+    )
+  }
+
   obterPorId(id: number) {
     return this.http.request('GET', this.rootUrl + '/' + id).pipe(
+      res => {
+        return res;
+      }
+    )
+  }
+
+  excluirCliente(id: number) {
+    return this.http.request('DELETE', this.rootUrl + '/excluir/' + id).pipe(
       res => {
         return res;
       }

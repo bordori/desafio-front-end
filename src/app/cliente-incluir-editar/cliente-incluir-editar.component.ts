@@ -12,6 +12,7 @@ import {Cliente} from "../model/cliente.model";
 import {TelefoneCliente} from "../model/telefone-cliente.model";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ClienteService} from "../service/cliente.service";
+import {Utils} from "../util/utils";
 
 @Component({
   selector: 'app-cliente-incluir-editar',
@@ -33,7 +34,6 @@ export class ClienteIncluirEditarComponent implements OnInit {
   @ViewChild('dynamicFormTelefoneCliente', {static: true}) dynamicFormTelefoneCliente?: PoDynamicFormComponent;
   @ViewChild('clienteForm', {static: true}) clienteForm?: PoDynamicFormComponent;
 
-  validateFields: Array<string> = ['nome'];
   cliente: Cliente = {telefones: []}
 
   telefoneCliente: TelefoneCliente = {}
@@ -60,6 +60,18 @@ export class ClienteIncluirEditarComponent implements OnInit {
         error: (e) => {
           console.error(e)
           this.hiddenLoading = true
+
+          let erro = 'Erro ao buscar cliente'
+
+          if (e.error.error)
+            erro = e.error.error
+
+          this.poNotification.error({
+            message: erro,
+            duration: 5000,
+          })
+
+          this.router.navigate(['/cliente']).then(r => console.log(r))
         },
         complete: () => {
           console.log('complete')
@@ -69,48 +81,9 @@ export class ClienteIncluirEditarComponent implements OnInit {
     }
   }
 
-  ngOnDestroy() {
-    console.log('destroy')
-  }
-
   ngOnInit() {
     this.buildFields()
     this.builderFieldsTelefone()
-  }
-
-  salvar() {
-    console.log(this.cliente)
-  }
-
-  onChangeFields(changedValue: PoDynamicFormFieldChanged): PoDynamicFormValidation {
-    if (changedValue.property === 'state') {
-
-    }
-    return {};
-  }
-
-  onLoadFields(value: any) {
-    // return this.registerService.getUserDocument(value);
-  }
-
-  onChangeFieldsTelefone(changedValue: PoDynamicFormFieldChanged): PoDynamicFormValidation {
-    console.log(changedValue)
-    return {}
-    // return {
-    //   value: { city: undefined },
-    //   fields: [
-    //     {
-    //       property: 'city',
-    //       gridColumns: 6,
-    //       options: this.registerService.getCity(changedValue.value.state),
-    //       disabled: false
-    //     }
-    //   ]
-    // };
-  }
-
-  onLoadFieldsTelefone(value: any) {
-    // return this.registerService.getUserDocument(value);
   }
 
   buildFields() {
@@ -120,6 +93,8 @@ export class ClienteIncluirEditarComponent implements OnInit {
         label: 'Nome',
         required: true,
         gridColumns: 6,
+        gridSmColumns: 12,
+        className: 'custom-class',
         maxLength: 100,
         minLength: 10,
         showRequired: true
@@ -129,6 +104,7 @@ export class ClienteIncluirEditarComponent implements OnInit {
         label: 'Endereço',
         required: false,
         gridColumns: 6,
+        gridSmColumns: 12,
         maxLength: 100,
       },
       {
@@ -136,6 +112,7 @@ export class ClienteIncluirEditarComponent implements OnInit {
         label: 'Bairro',
         required: false,
         gridColumns: 6,
+        gridSmColumns: 12,
         maxLength: 100,
       },
     ]
@@ -185,7 +162,6 @@ export class ClienteIncluirEditarComponent implements OnInit {
         this.poNotification.information({
           message: 'Telefone já cadastrado',
           duration: 5000,
-          orientation: PoToasterOrientation.Top
         })
       }
     }
@@ -203,34 +179,58 @@ export class ClienteIncluirEditarComponent implements OnInit {
       this.poNotification.error({
         message: 'Preencha os campos obrigatórios',
         duration: 5000,
-        orientation: PoToasterOrientation.Top
       })
       return
     }
 
-    this.clienteService.salvarCliente(this.cliente).subscribe( {
-      next: (v) => {
-        this.poNotification.success({
-          message: 'Cliente salvo com sucesso',
-          duration: 5000,
-          orientation: PoToasterOrientation.Top
-        })
-      },
-      error: (e) => {
-        console.error(e)
-        if (e.error.error)
-          var erro =  e.error.error
+    if (!this.cliente.id) {
+      this.clienteService.salvarCliente(this.cliente).subscribe({
+        next: (v) => {
+          this.poNotification.success({
+            message: 'Cliente salvo com sucesso',
+            duration: 5000,
+          })
+        },
+        error: (e) => {
+          console.error(e)
+          if (e.error.error)
+            var erro = e.error.error
 
-        this.poNotification.error({
-          message: erro ? erro : 'Erro ao salvar cliente',
-          duration: 5000,
-          orientation: PoToasterOrientation.Top
-        })
+          this.poNotification.error({
+            message: erro ? erro : 'Erro ao salvar cliente',
+            duration: 5000,
+          })
 
-      },
-      complete: () => {
-        this.router.navigate(['/cliente'])
-      }
-    })
+        },
+        complete: () => {
+          this.router.navigate(['/cliente'])
+        }
+      })
+    } else {
+      this.clienteService.alterarCliente(this.cliente).subscribe({
+        next: (v) => {
+          this.poNotification.success({
+            message: 'Cliente alterado com sucesso',
+            duration: 5000,
+          })
+        },
+        error: (e) => {
+          console.error(e)
+          if (e.error.error)
+            var erro = e.error.error
+
+          this.poNotification.error({
+            message: erro ? erro : 'Erro ao alterar cliente',
+            duration: 5000,
+          })
+
+        },
+        complete: () => {
+          this.router.navigate(['/cliente'])
+        }
+      })
+    }
   }
+
+    protected readonly Utils = Utils;
 }
