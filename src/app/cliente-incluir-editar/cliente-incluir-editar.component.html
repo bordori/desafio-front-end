@@ -1,0 +1,70 @@
+<po-page-default>
+  <po-loading-overlay #loadingOverlayComponent [p-screen-lock]="true" [hidden]="hiddenLoading"></po-loading-overlay>
+
+  <po-dynamic-form
+    #clienteForm
+    p-auto-focus="name"
+    [p-fields]="fields"
+    [p-load]="onLoadFields.bind(this)"
+    [p-validate]="this.onChangeFields.bind(this)"
+    [p-validate-fields]="validateFields"
+    [p-value]="cliente"
+  >
+  </po-dynamic-form>
+  <br/>
+  <po-divider p-label="Contatos"></po-divider>
+
+  <po-container>
+    <po-dynamic-form
+      #dynamicFormTelefoneCliente
+      [p-fields]="fieldsTelefone"
+      [p-load]="onLoadFieldsTelefone.bind(this)"
+      [p-validate]="this.onChangeFieldsTelefone.bind(this)"
+      [p-validate-fields]="validateFields"
+      [p-value]="telefoneCliente"
+    >
+    </po-dynamic-form>
+
+    <po-button class="po-row"
+               p-label="Adicionar"
+               (p-click)="adicionarTelefone()">
+    </po-button>
+  </po-container>
+
+
+  <br/>
+
+  <po-table class="po-md-6 po-lg-6"
+            [p-auto-collapse]="true"
+            [p-columns]="getCollumnsTelefone()"
+            [p-hide-columns-manager]="true"
+            [p-items]="getTelefonesCliente()"
+            [p-sort]="true"
+            [p-striped]="true"
+            [p-spacing]="PoTableColumnSpacing.Small"
+            [p-actions]="actions"
+            [p-actions-right]="true"
+            [p-height]="200"
+  >
+
+    <ng-template p-table-cell-template let-column="column" let-row="row">
+      <span>{{ row.telefone }}</span>
+    </ng-template>
+  </po-table>
+
+  <br/>
+  <br/>
+  <po-divider></po-divider>
+  <div>
+    <po-button
+      p-label="Salvar"
+      style="margin-right: 10px;"
+      (p-click)="salvarCliente()"
+    >
+    </po-button>
+    <po-button
+      p-label="Cancelar"
+      routerLink="/cliente"></po-button>
+  </div>
+</po-page-default>
+

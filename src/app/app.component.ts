@@ -1,13 +1,30 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {Component} from '@angular/core';
+import {Router, RouterOutlet} from '@angular/router';
+
+import {PoMenuItem, PoMenuModule, PoToolbarModule,} from '@po-ui/ng-components';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.css'],
+  imports: [
+    PoToolbarModule,
+    PoMenuModule,
+    RouterOutlet
+  ]
 })
 export class AppComponent {
-  title = 'desafio-front-end';
+  readonly menus: Array<PoMenuItem> = [
+    {label: 'Home', link:'/', icon: 'po-icon-home', shortLabel: 'Home'},
+    {
+      label: 'Cliente',
+      link: '/cliente',
+      icon: 'po-icon-user',
+      shortLabel: 'Cliente',
+    },
+  ];
+
+  constructor(private router: Router) {
+  }
 }
